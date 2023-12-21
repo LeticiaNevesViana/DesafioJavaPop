@@ -1,0 +1,9 @@
+appId: com.example.desafiojavapop
+---
+- launchApp:
+      appId: "com.example.desafiojavapop"
+      stopApp: true
+      clearState: true
+- tapOn:
+        id: "com.example.desafiojavapop:id/textViewRepoDescription"
+        index: 0

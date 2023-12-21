@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DesafioJavaPop</string>
+    <string name="forks">Forks</string>
+    <string name="stars">Stars</string>
+    <string name="data_de_abertura">Data de Abertura:</string>
+    <string name="data">12/01/1908</string>
+    <string name="empty_pr"> Não há Pull Requests neste repositório</string>
+    <string name="erro_pr">Erro ao carregar pull requests</string>
+</resources>
