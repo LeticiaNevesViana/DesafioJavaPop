@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 @Database(entities = [HomeEntity::class, PullRequestEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun repositoriesDao(): HomeDao
-    abstract fun pullrequestsDao(): PullRquestDao
+    abstract fun pullrequestsDao(): PullRequestDao
 
     companion object {
         private var INSTANCE: AppDatabase? = null
@@ -18,7 +18,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "java_pop_database"
+                    "desafio_java_pop_database"
                 ).build()
                 INSTANCE = instance
                 instance

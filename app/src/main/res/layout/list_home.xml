@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -22,7 +23,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp">
 
             <ImageView
                 android:id="@+id/imageViewAuthor"
@@ -39,14 +41,14 @@
                 android:id="@+id/textViewAuthorName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="20dp"
                 android:text="AuthorName"
                 app:layout_constraintBottom_toTopOf="@+id/imageViewForks"
-                app:layout_constraintEnd_toStartOf="@id/textViewRepoDescription"
-                app:layout_constraintHorizontal_bias="0.21"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageViewAuthor"
-                app:layout_constraintVertical_bias="0.634" />
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:paddingStart="2dp"
+                />
 
             <TextView
                 android:id="@+id/textViewRepoName"
@@ -54,13 +56,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="NOME DO REPOSITÓRIO"
-                android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.507"
                 app:layout_constraintStart_toEndOf="@+id/imageViewAuthor"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="12dp"
+
+
+                />
 
             <TextView
                 android:id="@+id/textViewRepoDescription"
@@ -80,23 +83,25 @@
                 android:id="@+id/imageViewForks"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="12dp"
                 android:src="@drawable/ic_fork"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/textViewForks" />
+                app:layout_constraintTop_toBottomOf="@id/textViewAuthorName"
+                android:layout_marginBottom="12dp"
+                android:layout_marginTop="12dp"
+                app:tint="@color/black" />
 
             <TextView
                 android:id="@+id/textViewForks"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
-                android:layout_marginHorizontal="8dp"
-                android:layout_marginVertical="8dp"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="3dp"
                 android:layout_marginTop="12dp"
                 android:text="@string/forks"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewStars"
                 app:layout_constraintStart_toEndOf="@+id/imageViewForks"
-                app:layout_constraintTop_toTopOf="@id/imageViewForks" />
+                app:layout_constraintTop_toBottomOf="@id/textViewAuthorName"
+                />
 
             <ImageView
 
@@ -107,13 +112,14 @@
                 android:src="@drawable/ic_star"
                 app:layout_constraintEnd_toStartOf="@+id/textViewStars"
                 app:layout_constraintStart_toEndOf="@+id/textViewForks"
-                app:layout_constraintTop_toTopOf="@+id/textViewForks" />
+                app:layout_constraintTop_toTopOf="@+id/textViewForks"
+                app:tint="@color/black" />
 
             <TextView
                 android:id="@+id/textViewStars"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="3dp"
                 android:text="@string/stars"
                 app:layout_constraintStart_toEndOf="@+id/imageViewStars"
                 app:layout_constraintTop_toTopOf="@+id/imageViewStars" />

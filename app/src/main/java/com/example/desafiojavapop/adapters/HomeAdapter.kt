@@ -19,11 +19,12 @@ class HomeAdapter(private val onItemClicked: (HomeModel) -> Unit) : RecyclerView
         return repos.size
     }
 
-    fun setList(repos: List<HomeModel>) {
-        this.repos.clear()
-        this.repos.addAll(repos  as Collection<HomeModel>)
-        notifyDataSetChanged()
+    fun updateList(newItems: List<HomeModel>) {
+        val initialSize = repos.size
+        repos.addAll(newItems)
+        notifyItemRangeInserted(initialSize, newItems.size)
     }
+
 
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
         val item = repos[position]

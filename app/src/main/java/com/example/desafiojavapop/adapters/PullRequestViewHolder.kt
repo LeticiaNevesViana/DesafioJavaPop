@@ -1,6 +1,7 @@
 package com.example.desafiojavapop.adapters
 
 import android.view.View
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.desafiojavapop.databinding.ListPullRequestBinding
 import com.example.desafiojavapop.model.PullRequestModel
@@ -10,7 +11,6 @@ class PullRequestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
     private val binding = ListPullRequestBinding.bind(itemView)
 
     fun bind(item: PullRequestModel, onItemClicked: (String) -> Unit) {
-
         binding.textViewtitleOfPr.text = item.title
         Picasso.get().load(item.user?.avatarUrl).into(binding.imageViewAuthor)
         binding.textViewBodyDescription.maxLines = 2
@@ -19,7 +19,11 @@ class PullRequestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         binding.textViewDayOfCreate.text = item.getCreatedAtDateString()
 
         itemView.setOnClickListener {
-            onItemClicked(item.htmlUrl)
+            item.htmlUrl?.let { url ->
+                onItemClicked(url)
+            } ?: run {
+                Toast.makeText(itemView.context, "URL não disponível", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

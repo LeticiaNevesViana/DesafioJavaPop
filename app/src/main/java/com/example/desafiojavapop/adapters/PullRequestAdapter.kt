@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.desafiojavapop.R
 import com.example.desafiojavapop.model.PullRequestModel
+import kotlin.reflect.KFunction1
 
-class PullRequestAdapter(private val onItemClicked: (String) -> Unit) : RecyclerView.Adapter<PullRequestViewHolder>() {
+class PullRequestAdapter(private val onItemClicked: KFunction1<String, Unit>) : RecyclerView.Adapter<PullRequestViewHolder>() {
 
     private var pullRequests = mutableListOf<PullRequestModel>()
 

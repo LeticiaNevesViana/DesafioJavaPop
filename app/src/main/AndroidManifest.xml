@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -14,16 +15,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DesafioJavaPop"
         tools:targetApi="31">
+
+        <!-- HomeActivity -->
         <activity
             android:name=".ui.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.PullRequestActivity" />
-    </application>
 
+        <!-- PullRequestActivity -->
+        <activity android:name=".ui.PullRequestActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Certifique-se de que o esquema, host e pathPattern correspondam à sua URI -->
+                <data
+                    android:scheme="app"
+                    android:host="desafiojavapop"
+                    android:pathPrefix="/pullrequest"  />
+            </intent-filter>
+        </activity>
+
+    </application>
 </manifest>

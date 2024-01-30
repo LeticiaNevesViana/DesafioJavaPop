@@ -15,8 +15,8 @@ import com.squareup.picasso.Picasso
         binding.textViewRepoDescription.maxLines = 2
         binding.textViewRepoDescription.text = item.description
         binding.textViewAuthorName.text = item.owner?.login
-        binding.textViewForks.text = item.forks.toString()
-        binding.textViewStars.text = item.stars.toString()
+        binding.textViewForks.text = item.forksCount.toString()
+        binding.textViewStars.text = item.starsCount.toString()
 
         itemView.setOnClickListener {
             onItemClicked(item)

@@ -1,26 +1,24 @@
 package com.example.desafiojavapop.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class HomeModel(
-    @SerializedName("id")
     val id: Int,
     @SerializedName("name")
     val repo: String?,
-    @SerializedName("description")
-    var description: String?,
-    @SerializedName("owner")
-    val owner: UserModel,
+    val description: String?,
+    val owner: UserModel?,
     @SerializedName("stargazers_count")
-    val stars: Int?,
+    val starsCount: Int?,
     @SerializedName("forks_count")
-    val forks: Int?,
+    val forksCount: Int?,
     @SerializedName("full_name")
     val fullName: String?,
-    @SerializedName("page_number")
-    var pageNumber: Int?
+    var pageNumber: Int?,
+) : Parcelable
 
-): Serializable
 
 
