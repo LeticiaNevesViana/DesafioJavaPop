@@ -25,13 +25,13 @@ class PullRequestRepositoryImpl(
                     savePullRequestsToDb(pullRequests)
                     ResultWrapper.Success(pullRequests)
                 } else {
-                    fetchFromCache(login, repoName)
+                    ResultWrapper.Failure(Exception("Erro na API"), response.errorBody()?.string(), response.code())
                 }
             } catch (e: Exception) {
-                fetchFromCache(login, repoName)
+                ResultWrapper.Failure(e, e.message, null)
             }
         } else {
-            fetchFromCache(login, repoName)
+            ResultWrapper.NetworkError
         }
     }
 
@@ -48,15 +48,6 @@ class PullRequestRepositoryImpl(
         database.pullrequestsDao().insertAll(entities)
     }
 
-    private suspend fun fetchFromCache(login: String, repoName: String): ResultWrapper<List<PullRequestModel>> {
-        val cachedPullRequests = getPullRequestsFromDb(login, repoName)
-        return if (cachedPullRequests.isNotEmpty()) {
-            ResultWrapper.Success(cachedPullRequests)
-        } else {
-            ResultWrapper.Failure(Exception("No cached data available."))
-        }
-    }
-
     private fun PullRequestModel.toEntity(): PullRequestEntity {
         return PullRequestEntity(
             id = this.id,
@@ -67,20 +58,18 @@ class PullRequestRepositoryImpl(
             fullName = this.fullName,
             userLogin = this.user?.login,
             userAvatarUrl = this.user?.avatarUrl
-
         )
     }
 
     private fun PullRequestEntity.toModel(): PullRequestModel {
         return PullRequestModel(
             id = this.id,
-            title = this.title?: "",
-            createdAt = this.createdAt?: "",
-            body = this.body?: "",
-            htmlUrl = this.htmlUrl?: "",
-            fullName = this.fullName?: "",
-            user = UserModel(this.userLogin ?: "", "")
+            title = this.title ?: "",
+            createdAt = this.createdAt ?: "",
+            body = this.body ?: "",
+            htmlUrl = this.htmlUrl ?: "",
+            fullName = this.fullName ?: "",
+            user = UserModel(this.userLogin ?: "", this.userAvatarUrl ?: "")
         )
     }
 }
-

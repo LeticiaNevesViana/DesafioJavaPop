@@ -1,61 +1,56 @@
-package com.example.desafiojavapop
-
-import com.example.desafiojavapop.model.HomeResponse
-import com.example.desafiojavapop.repository.HomeRepositoryImpl
+import com.example.desafiojavapop.FakeHomeModel
+import com.example.desafiojavapop.repository.HomeRepository
 import com.example.desafiojavapop.usecase.HomeFetchRepositoriesUseCase
 import com.example.desafiojavapop.util.ResultWrapper
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody.Companion.toResponseBody
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
-import retrofit2.Response
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.anyInt
 
-@RunWith(MockitoJUnitRunner::class)
 class HomeFetchRepositoriesUseCaseTest {
 
-    @Mock
-    lateinit var repository: HomeRepositoryImpl
+    private lateinit var homeFetchRepositoriesUseCase: HomeFetchRepositoriesUseCase
+    private lateinit var repository: HomeRepository
 
-    @InjectMocks
-    lateinit var useCase: HomeFetchRepositoriesUseCase
-
-    @Test
-    fun `invoke returns cached repositories when available`() = runBlocking {
-        val fakeCachedRepos = listOf(FakeHomeModel().fakeHomeModel)
-        `when`(repository.getRepositoriesFromDb(QUERY, PAGE)).thenReturn(fakeCachedRepos)
-
-        val result = useCase.invoke(QUERY, SORT, PAGE)
-        verify(repository, never()).getRepositoriesFromApi(QUERY, SORT, PAGE)
-        assertEquals(ResultWrapper.Success(fakeCachedRepos), result)
+    @Before
+    fun setUp() {
+        repository = mock(HomeRepository::class.java)
+        homeFetchRepositoriesUseCase = HomeFetchRepositoriesUseCase(repository)
     }
 
     @Test
-    fun `invoke returns failure when API call fails`() = runBlocking {
-        `when`(repository.getRepositoriesFromDb(QUERY, PAGE)).thenReturn(emptyList())
-        val errorString = "Erro na API"
-        val responseBody = errorString.toResponseBody("text/plain".toMediaTypeOrNull())
-        val apiError = Response.error<HomeResponse>(404, responseBody)
-        `when`(repository.getRepositoriesFromApi(QUERY, SORT, PAGE)).thenReturn(apiError)
+    fun `invoke returns list of repositories on success`() = runBlocking {
+        // Given
+        val fakeHomeModel = FakeHomeModel()
+        val expectedRepositories = listOf(fakeHomeModel.createFakeHomeModel())
+        `when`(repository.getRepositories(anyString(), anyString(), anyInt()))
+            .thenReturn(ResultWrapper.Success(expectedRepositories))
 
-        val result = useCase.invoke(QUERY, SORT, PAGE)
+        // When
+        val result = homeFetchRepositoriesUseCase.invoke("language:Java", "stars", 1)
 
-        assertTrue(result is ResultWrapper.Failure)
+        // Then
+        assertEquals(ResultWrapper.Success(expectedRepositories), result)
     }
 
+    @Test
+    fun `invoke returns failure on error`() = runBlocking {
+        // Given
+        val query = "language:Java"
+        val sort = "stars"
+        val page = 1
+        val errorMessage = "Network Error"
+        `when`(repository.getRepositories(query, sort, page))
+            .thenReturn(ResultWrapper.Failure(Exception(errorMessage)))
 
-    companion object {
-        private const val QUERY = "language:Java"
-        private const val SORT = "stars"
-        private const val PAGE = 1
-    }
+        // When
+        val result = homeFetchRepositoriesUseCase.invoke(query, sort, page)
 
+        // Then
+        assert(result is ResultWrapper.Failure && result.exception.message == errorMessage)
     }
+}

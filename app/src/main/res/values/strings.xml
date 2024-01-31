@@ -6,4 +6,5 @@
     <string name="data">12/01/1908</string>
     <string name="empty_pr"> Não há Pull Requests neste repositório</string>
     <string name="erro_pr">Erro ao carregar pull requests</string>
+    <string name="error_no_internet">Sem conexão com a Internet</string>
 </resources>

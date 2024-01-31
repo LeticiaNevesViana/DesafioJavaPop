@@ -11,7 +11,6 @@ import com.example.desafiojavapop.R
 import com.example.desafiojavapop.adapters.PullRequestAdapter
 import com.example.desafiojavapop.database.AppDatabase
 import com.example.desafiojavapop.databinding.ActivityPullRequestBinding
-import com.example.desafiojavapop.model.HomeModel
 import com.example.desafiojavapop.model.PullRequestModel
 import com.example.desafiojavapop.repository.HomeRepositoryImpl
 import com.example.desafiojavapop.repository.PullRequestRepositoryImpl
@@ -25,22 +24,26 @@ import com.google.android.material.snackbar.Snackbar
 
 class PullRequestActivity : AppCompatActivity() {
 
+    // Lateinit para inicialização posterior do binding
     private lateinit var binding: ActivityPullRequestBinding
+
+    // Inicialização do ViewModel com uma Factory para injeção de dependências
     private val viewModel: PullRequestViewModel by viewModels {
         PullRequestViewModelFactory(
             FetchPullRequestsUseCase(PullRequestRepositoryImpl(
-                RetrofitService.apiService,
-                AppDatabase.getDatabase(this),
-                NetworkUtils(this)
+                RetrofitService.apiService, // Serviço da API para chamadas de rede
+                AppDatabase.getDatabase(this), // Database para persistência de dados
+                NetworkUtils(this@PullRequestActivity) // Utilitário de rede para verificar conectividade
             )),
             HomeRepositoryImpl(
                 RetrofitService.apiService,
                 AppDatabase.getDatabase(this),
-                NetworkUtils(this)
+                NetworkUtils(this@PullRequestActivity)
             )
         )
     }
 
+    // Adapter para o RecyclerView que exibe os Pull Requests
     private val pullRequestAdapter = PullRequestAdapter(this::openLink)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +51,8 @@ class PullRequestActivity : AppCompatActivity() {
         binding = ActivityPullRequestBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupRecyclerView()
-        observeViewModel()
+        setupRecyclerView() // Configura o RecyclerView
+        observeViewModel() // Observa mudanças nos dados do ViewModel
 
         val repoId = intent?.data?.getQueryParameter("repoId")?.toIntOrNull()
 
@@ -58,53 +61,64 @@ class PullRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupRecyclerView()=
-        binding.prRecyclerview.apply {
+    // Configuração inicial do RecyclerView
+    private fun setupRecyclerView() = binding.prRecyclerview.apply {
         layoutManager = LinearLayoutManager(context)
         setHasFixedSize(true)
         adapter = pullRequestAdapter
     }
 
+    // Observa o LiveData do ViewModel e atualiza a UI de acordo com o estado dos dados
     private fun observeViewModel() {
         viewModel.pullRequests.observe(this) { result ->
             when (result) {
-                is ResultWrapper.Success -> handleSuccess(result.data)
-                is ResultWrapper.Failure -> showError()
-                else -> showUnexpectedError()
+                is ResultWrapper.Success -> handleSuccess(result.data) // Em caso de sucesso, exibe os dados
+                is ResultWrapper.Failure -> showError() // Em caso de falha, exibe uma mensagem de erro
+                is ResultWrapper.NetworkError -> showNetworkError() // Em caso de erro de rede, exibe uma mensagem específica
+                else -> showUnexpectedError() // Para qualquer outro caso, exibe uma mensagem de erro genérica
             }
         }
-
     }
 
+    // Trata o caso de sucesso, verificando se a lista de Pull Requests está vazia ou não
     private fun handleSuccess(data: List<PullRequestModel>) {
         if (data.isEmpty()) {
-            showNoPullRequestsView()
+            showNoPullRequestsView() // Se vazia, exibe uma mensagem indicando que não há Pull Requests
         } else {
-            showPullRequestsView(data)
+            showPullRequestsView(data) // Se não, exibe a lista de Pull Requests
         }
     }
 
+    // Exibe uma mensagem indicando que não há Pull Requests
     private fun showNoPullRequestsView() {
         binding.noPullRequests.visibility = View.VISIBLE
         binding.prRecyclerview.visibility = View.GONE
     }
 
+    // Exibe a lista de Pull Requests
     private fun showPullRequestsView(data: List<PullRequestModel>) {
         binding.noPullRequests.visibility = View.GONE
         binding.prRecyclerview.visibility = View.VISIBLE
-        pullRequestAdapter.setList(data)
+        pullRequestAdapter.setList(data) // Atualiza os dados do adapter
     }
 
+    // Exibe uma Snackbar com uma mensagem de erro genérica
     private fun showError() {
         Snackbar.make(binding.root, R.string.erro_pr, Snackbar.LENGTH_LONG).show()
     }
+
+    // Exibe uma Snackbar com uma mensagem de erro de rede
+    private fun showNetworkError() {
+        Snackbar.make(binding.root, R.string.error_no_internet, Snackbar.LENGTH_LONG).show()
+    }
+
+    // Exibe uma Snackbar com uma mensagem de erro inesperado
     private fun showUnexpectedError() {
         Snackbar.make(binding.root, R.string.erro_pr, Snackbar.LENGTH_LONG).show()
     }
 
+    // Abre um link no navegador padrão do dispositivo
     private fun openLink(url: String) {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     }
-
-
 }
