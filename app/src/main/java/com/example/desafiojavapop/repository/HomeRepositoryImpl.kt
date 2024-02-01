@@ -26,13 +26,15 @@ class HomeRepositoryImpl(
                     saveRepositoriesToDb(repoList, query, page)
                     ResultWrapper.Success(repoList)
                 } else {
+                    Log.e("API Error", "Code: ${response.code()} Message: ${response.message()}")
                     fetchFromCache(query, page)
                 }
             } catch (e: Exception) {
+                Log.e("API Exception", e.message ?: "Unknown error")
                 fetchFromCache(query, page)
             }
         } else {
-            fetchFromCache(query, page)
+            ResultWrapper.NetworkError
         }
     }
 
@@ -54,7 +56,7 @@ class HomeRepositoryImpl(
         return if (cachedRepos.isNotEmpty()) {
             ResultWrapper.Success(cachedRepos)
         } else {
-            ResultWrapper.Failure(Exception("Não há dados em cache."))
+            ResultWrapper.Failure(Exception("Não há dados em cache para serem exibidos."))
         }
     }
 

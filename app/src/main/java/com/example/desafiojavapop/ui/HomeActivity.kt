@@ -10,16 +10,19 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.desafiojavapop.R
 import com.example.desafiojavapop.adapters.HomeAdapter
 import com.example.desafiojavapop.database.AppDatabase
 import com.example.desafiojavapop.databinding.ActivityHomeBinding
 import com.example.desafiojavapop.repository.HomeRepositoryImpl
 import com.example.desafiojavapop.rest.RetrofitService
 import com.example.desafiojavapop.usecase.HomeFetchRepositoriesUseCase
+import com.example.desafiojavapop.util.LoadType
 import com.example.desafiojavapop.util.NetworkUtils
 import com.example.desafiojavapop.util.ResultWrapper
 import com.example.desafiojavapop.viewmodel.HomeViewModel
 import com.example.desafiojavapop.viewmodel.HomeViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 
 class HomeActivity : AppCompatActivity() {
 
@@ -54,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
         progressBar = binding.progressBarScroll
         setupUI()
         observeViewModel()
-        viewModel.fetchRepositories(REPO_QUERY, SORT_CRITERIA)
+        viewModel.fetchData(REPO_QUERY, SORT_CRITERIA, LoadType.INITIAL)
     }
 
     private fun setupUI() {
@@ -69,11 +72,12 @@ class HomeActivity : AppCompatActivity() {
             when (result) {
                 is ResultWrapper.Success -> homeAdapter.updateList(result.data) // Atualiza os dados no adapter
                 is ResultWrapper.Failure -> showError(result.exception.message) // Mostra um erro
-                else -> {}
+                is ResultWrapper.NetworkError -> showNetworkError() // Em caso de erro de rede, exibe uma mensagem específica
+                else -> showUnexpectedError()
+
             }
         }
 
-        // Observadores para os estados de carregamento
         viewModel.isLoading.observe(this) { isLoading ->
             toggleProgressBar(isLoading, isLoadingForRefresh = true)
         }
@@ -81,18 +85,15 @@ class HomeActivity : AppCompatActivity() {
             toggleProgressBar(isLoadingMore, isLoadingForRefresh = false)
         }
 
-        // Atualiza o adapter quando a lista de repositórios é alterada
         viewModel.currentRepoList.observe(this) { updatedList ->
             homeAdapter.updateList(updatedList)
         }
 
-        // Mostra ou esconde um indicador quando não há mais páginas para carregar
         viewModel.isLastPageLiveData.observe(this) { isLast ->
             binding.noMorpages.visibility = if (isLast) View.VISIBLE else View.GONE
         }
     }
 
-    // Configuração inicial do RecyclerView
     private fun setupRecyclerview() {
         binding.homeRecyclerview.apply {
             layoutManager = LinearLayoutManager(context)
@@ -101,30 +102,30 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    // Adiciona um listener para implementar a lógica de carregar mais itens ao rolar
     private fun setupScrollListener() {
         binding.homeRecyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                handleScroll(dy) // Chama handleScroll ao rolar
+                handleScroll(dy)
             }
         })
     }
-
     private fun handleScroll(dy: Int) {
-        if (dy > 0) { // Verifica se a rolagem é para baixo
-            val layoutManager = binding.homeRecyclerview.layoutManager as LinearLayoutManager
-            val totalItemCount = layoutManager.itemCount
-            val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-            val isNotLoadingMore = viewModel.isLoadingMore.value ?: false
-            if (!isNotLoadingMore && lastVisibleItem == totalItemCount - 1) {
-                viewModel.loadNextPage(REPO_QUERY, SORT_CRITERIA) // Carrega mais dados
-            }
+        if (dy > 0 && shouldLoadMoreItems()) {
+            viewModel.fetchData(REPO_QUERY, SORT_CRITERIA, LoadType.MORE)
         }
     }
+    private fun shouldLoadMoreItems(): Boolean {
+        val layoutManager = binding.homeRecyclerview.layoutManager as LinearLayoutManager
+        val totalItemCount = layoutManager.itemCount
+        val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+        return viewModel.isLoadingMore.value?.let{
+            !it && lastVisibleItemPosition == totalItemCount - 1 } ?: false
+    }
+
     private fun pullToRefresh() {
         binding.pullRefresh.setOnRefreshListener {
-            viewModel.fetchRepositories(REPO_QUERY, SORT_CRITERIA, isRefresh = true)
+            viewModel.fetchData(REPO_QUERY, SORT_CRITERIA, loadType = LoadType.REFRESH)
         }
 
         viewModel.refreshComplete.observe(this) { isComplete ->
@@ -138,12 +139,17 @@ class HomeActivity : AppCompatActivity() {
         progressBar.visibility = if (isVisible && !isLoadingForRefresh) View.VISIBLE else View.GONE
     }
 
-    // Mostra um Toast com uma mensagem de erro
     private fun showError(message: String?) {
-        Toast.makeText(this, "Erro: $message", Toast.LENGTH_LONG).show()
+        Snackbar.make(binding.root, "Erro: $message", Toast.LENGTH_LONG).show()
     }
 
-    // Navega para a página de Pull Requests baseado no ID do repositório
+    private fun showNetworkError() {
+        Snackbar.make(binding.root, R.string.error_no_internet, Snackbar.LENGTH_LONG).show()
+    }
+    private fun showUnexpectedError() {
+        Snackbar.make(binding.root, R.string.erro_pr, Snackbar.LENGTH_LONG).show()
+    }
+
     private fun navigateToPullRequestPage(repoId: Int) {
         val deepLink = Uri.Builder()
             .scheme("app")
@@ -157,7 +163,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val REPO_QUERY = "language:Java" // Query de busca por repositórios Java
-        private const val SORT_CRITERIA = "stars" // Critério de ordenação por estrelas
+        private const val REPO_QUERY = "language:Java"
+        private const val SORT_CRITERIA = "stars"
     }
 }
