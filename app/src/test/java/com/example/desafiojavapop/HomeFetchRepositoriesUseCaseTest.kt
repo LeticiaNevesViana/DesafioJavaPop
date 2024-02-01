@@ -18,14 +18,14 @@ class HomeFetchRepositoriesUseCaseTest {
 
     @Before
     fun setUp() {
-        repository = mock(HomeRepository::class.java)
+        repository = mock(HomeRepository::class.java)//cria um mock de HomeRepository
         homeFetchRepositoriesUseCase = HomeFetchRepositoriesUseCase(repository)
     }
 
     @Test
     fun `invoke returns list of repositories on success`() = runBlocking {
         // Given
-        val fakeHomeModel = FakeHomeModel()
+        val fakeHomeModel = FakeHomeModel()//mock do HomeModel
         val expectedRepositories = listOf(fakeHomeModel.createFakeHomeModel())
         `when`(repository.getRepositories(anyString(), anyString(), anyInt()))
             .thenReturn(ResultWrapper.Success(expectedRepositories))
@@ -43,7 +43,7 @@ class HomeFetchRepositoriesUseCaseTest {
         val query = "language:Java"
         val sort = "stars"
         val page = 1
-        val errorMessage = "Network Error"
+        val errorMessage = "Falha na chamada da API"
         `when`(repository.getRepositories(query, sort, page))
             .thenReturn(ResultWrapper.Failure(Exception(errorMessage)))
 
