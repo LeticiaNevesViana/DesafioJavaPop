@@ -21,13 +21,14 @@ import com.example.desafiojavapop.util.ResultWrapper
 import com.example.desafiojavapop.viewmodel.PullRequestViewModel
 import com.example.desafiojavapop.viewmodel.PullRequestViewModelFactory
 import com.google.android.material.snackbar.Snackbar
+import java.lang.ref.WeakReference
 
 class PullRequestActivity : AppCompatActivity() {
 
-    // Lateinit para inicialização posterior do binding
-    private lateinit var binding: ActivityPullRequestBinding
+    private val binding: ActivityPullRequestBinding by lazy {
+        ActivityPullRequestBinding.inflate(layoutInflater)
+    }
 
-    // Inicialização do ViewModel com uma Factory para injeção de dependências
     private val viewModel: PullRequestViewModel by viewModels {
         PullRequestViewModelFactory(
             FetchPullRequestsUseCase(PullRequestRepositoryImpl(
@@ -44,11 +45,14 @@ class PullRequestActivity : AppCompatActivity() {
     }
 
     // Adapter para o RecyclerView que exibe os Pull Requests
-    private val pullRequestAdapter = PullRequestAdapter(this::openLink)
-
+    private val pullRequestAdapter: PullRequestAdapter by lazy {
+        val openLinkRef = WeakReference(this::openLink)
+        PullRequestAdapter { url ->
+            openLinkRef.get()?.invoke(url.toString())
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityPullRequestBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupRecyclerView() // Configura o RecyclerView

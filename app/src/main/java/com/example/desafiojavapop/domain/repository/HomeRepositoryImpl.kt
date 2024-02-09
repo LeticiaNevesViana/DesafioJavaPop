@@ -1,26 +1,26 @@
-package com.example.desafiojavapop.repository
+package com.example.desafiojavapop.domain.repository
 
 import android.util.Log
-import com.example.desafiojavapop.database.AppDatabase
-import com.example.desafiojavapop.database.HomeEntity
-import com.example.desafiojavapop.model.HomeModel
-import com.example.desafiojavapop.model.HomeResponse
-import com.example.desafiojavapop.model.UserModel
-import com.example.desafiojavapop.rest.ApiService
+import com.example.desafiojavapop.data.database.AppDatabase
+import com.example.desafiojavapop.data.database.HomeEntity
+import com.example.desafiojavapop.data.model.HomeModel
+import com.example.desafiojavapop.data.model.HomeResponse
+import com.example.desafiojavapop.data.model.UserModel
+import com.example.desafiojavapop.data.rest.ApiService
 import com.example.desafiojavapop.util.NetworkUtils
 import com.example.desafiojavapop.util.ResultWrapper
 import retrofit2.Response
 
 class HomeRepositoryImpl(
-    private val apiService: ApiService,
-    private val database: AppDatabase,
-    private val networkUtils: NetworkUtils
+    private val apiModule: ApiService,
+    private val databaseModule: AppDatabase,
+    private val networkModule: NetworkUtils
 ) : HomeRepository {
 
     override suspend fun getRepositories(query: String, sort: String, page: Int): ResultWrapper<List<HomeModel>> {
-        return if (networkUtils.isNetworkAvailable()) {
+        return if (networkModule.isNetworkAvailable()) {
             try {
-                val response = apiService.getRepositoriesFromApi(query, sort, page)
+                val response = apiModule.getRepositoriesFromApi(query, sort, page)
                 if (response.isSuccessful) {
                     val repoList = response.body()?.items ?: emptyList()
                     saveRepositoriesToDb(repoList, query, page)
@@ -39,16 +39,16 @@ class HomeRepositoryImpl(
     }
 
     override suspend fun getRepositoriesFromApi(query: String, sort: String, page: Int): Response<HomeResponse> {
-        return apiService.getRepositoriesFromApi(query, sort, page)
+        return apiModule.getRepositoriesFromApi(query, sort, page)
     }
 
     override suspend fun getRepositoriesFromDb(query: String, page: Int): List<HomeModel> {
-        return database.repositoriesDao().getRepositories(query, page).map { it.toHomeModel() }
+        return databaseModule.repositoriesDao().getRepositories(query, page).map { it.toHomeModel() }
     }
 
     override suspend fun saveRepositoriesToDb(repositories: List<HomeModel>, query: String, page: Int) {
         val entities = repositories.map { it.toEntity(query, page) }
-        database.repositoriesDao().insertAll(entities)
+        databaseModule.repositoriesDao().insertAll(entities)
     }
 
     private suspend fun fetchFromCache(query: String, page: Int): ResultWrapper<List<HomeModel>> {
@@ -61,12 +61,10 @@ class HomeRepositoryImpl(
     }
 
     override suspend fun getRepositoryById(repoId: Int): HomeModel {
-        return database.repositoriesDao().getRepositoryById(repoId).toHomeModel()
+        return databaseModule.repositoriesDao().getRepositoryById(repoId).toHomeModel()
     }
 
-}
-
-    private fun HomeEntity.toHomeModel(): HomeModel {
+    fun HomeEntity.toHomeModel(): HomeModel {
         return HomeModel(
             id = this.id,
             repo = this.repo,
@@ -78,7 +76,7 @@ class HomeRepositoryImpl(
             pageNumber = this.page
         )
     }
-    private fun HomeModel.toEntity(query: String, page: Int): HomeEntity {
+    fun HomeModel.toEntity(query: String, page: Int): HomeEntity {
         return HomeEntity(
             id = this.id,
             repo = this.repo ?: "",
@@ -92,3 +90,6 @@ class HomeRepositoryImpl(
             page = page
         )
     }
+
+
+}

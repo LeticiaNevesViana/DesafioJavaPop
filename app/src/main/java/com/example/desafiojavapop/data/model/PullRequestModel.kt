@@ -9,14 +9,25 @@ import java.util.Locale
 
 @Parcelize
 data class PullRequestModel (
+    @SerializedName("id")
     val id: Int,
+
+    @SerializedName("title")
     val title: String?,
+
     @SerializedName("created_at")
     var createdAt: String?,
+
+    @SerializedName("body")
     val body: String?,
+
     @SerializedName("html_url")
     val htmlUrl: String?,
+
+    @SerializedName("full_name")
     val fullName: String?,
+
+    @SerializedName("user")
     val user: UserModel?
 ) : Parcelable {
 

@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class UserModel(
     @SerializedName("login")
     val login: String?,
+
     @SerializedName("avatar_url")
     val avatarUrl: String?
 ): Parcelable

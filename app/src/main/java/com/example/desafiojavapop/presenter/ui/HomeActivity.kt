@@ -26,9 +26,12 @@ import com.google.android.material.snackbar.Snackbar
 
 class HomeActivity : AppCompatActivity() {
 
-    // Lateinit para inicialização posterior das variáveis
-    private lateinit var binding: ActivityHomeBinding
-    private lateinit var progressBar: ProgressBar
+    private val binding: ActivityHomeBinding by lazy {
+        ActivityHomeBinding.inflate(layoutInflater)
+    }
+    private val progressBar: ProgressBar by lazy {
+        binding.progressBarScroll
+    }
 
     // Adapter para o RecyclerView com um lambda para o clique nos itens
     private val homeAdapter = HomeAdapter { repo ->
@@ -50,11 +53,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Infla o layout usando View Binding e define o conteúdo da view
-        binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        progressBar = binding.progressBarScroll
         setupUI()
         observeViewModel()
         viewModel.fetchData(REPO_QUERY, SORT_CRITERIA, LoadType.INITIAL)
